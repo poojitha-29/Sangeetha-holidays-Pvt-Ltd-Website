@@ -24,6 +24,24 @@ const Header = () => {
     if (storedAuth === "true") {
       setIsAuthenticated(true);
     }
+
+    // --- New: auto-open modal when visiting with hash ---
+    const hash = window.location.hash.replace("#", "");
+    if (["terms", "privacy", "refund"].includes(hash)) {
+      setActivePolicy(hash);
+    }
+
+    const handleHashChange = () => {
+      const newHash = window.location.hash.replace("#", "");
+      if (["terms", "privacy", "refund"].includes(newHash)) {
+        setActivePolicy(newHash);
+      } else {
+        setActivePolicy(null);
+      }
+    };
+
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
   }, []);
 
   const handleLogin = (e) => {
@@ -40,6 +58,18 @@ const Header = () => {
   const handleLogout = () => {
     setIsAuthenticated(false);
     localStorage.removeItem("isAuthenticated");
+  };
+
+  // --- New: open modal and update hash ---
+  const handlePolicyOpen = (policy) => {
+    setActivePolicy(policy);
+    window.location.hash = policy;
+  };
+
+  // --- New: close modal and clear hash ---
+  const handlePolicyClose = () => {
+    setActivePolicy(null);
+    window.location.hash = "";
   };
 
   // Policy modal content
@@ -106,17 +136,16 @@ const Header = () => {
 
           {/* Right side buttons */}
           <div className="hidden md:flex items-center space-x-4">
-  <a
-  href="https://wa.me/918106868686?text=Hello%20I%20would%20like%20to%20enquire%20about%20a%20trip"
-  target="_blank"
-  rel="noopener noreferrer"
->
-  <Button variant="ghost" size="sm" className="text-foreground flex items-center">
-    <FaWhatsapp className="h-4 w-4 mr-1 text-green-500" />
-    Enquire Now
-  </Button>
-</a>
-
+            <a
+              href="https://wa.me/918106868686?text=Hello%20I%20would%20like%20to%20enquire%20about%20a%20trip"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Button variant="ghost" size="sm" className="text-foreground flex items-center">
+                <FaWhatsapp className="h-4 w-4 mr-1 text-green-500" />
+                Enquire Now
+              </Button>
+            </a>
 
             {/* Policies Dropdown */}
             <div className="relative group">
@@ -129,19 +158,19 @@ const Header = () => {
               </Button>
               <div className="absolute right-0 hidden group-hover:flex flex-col items-start bg-white text-black p-4 shadow-xl mt-3 min-w-[220px] rounded-xl space-y-2">
                 <button
-                  onClick={() => setActivePolicy("terms")}
+                  onClick={() => handlePolicyOpen("terms")}
                   className="hover:underline text-left w-full"
                 >
                   Terms & Conditions
                 </button>
                 <button
-                  onClick={() => setActivePolicy("privacy")}
+                  onClick={() => handlePolicyOpen("privacy")}
                   className="hover:underline text-left w-full"
                 >
                   Privacy Policy
                 </button>
                 <button
-                  onClick={() => setActivePolicy("refund")}
+                  onClick={() => handlePolicyOpen("refund")}
                   className="hover:underline text-left w-full"
                 >
                   Refund & Cancellation Policy
@@ -272,33 +301,32 @@ const Header = () => {
                 </a>
               ))}
               <div className="border-t border-border pt-4 space-y-2">
- <a
-  href="https://wa.me/918106868686?text=Hello%20I%20would%20like%20to%20enquire%20about%20a%20trip"
-  target="_blank"
-  rel="noopener noreferrer"
->
-  <Button variant="ghost" size="sm" className="text-foreground flex items-center">
-    <FaWhatsapp size={28} className="h-4 w-4 mr-1 text-green-500" />
-    Enquire Now
-  </Button>
-</a>
-
+                <a
+                  href="https://wa.me/918106868686?text=Hello%20I%20would%20like%20to%20enquire%20about%20a%20trip"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Button variant="ghost" size="sm" className="text-foreground flex items-center">
+                    <FaWhatsapp size={28} className="h-4 w-4 mr-1 text-green-500" />
+                    Enquire Now
+                  </Button>
+                </a>
 
                 {/* Policy mobile */}
                 <button
-                  onClick={() => setActivePolicy("terms")}
+                  onClick={() => handlePolicyOpen("terms")}
                   className="block px-3 py-2 text-base font-medium text-foreground hover:text-primary"
                 >
                   Terms & Conditions
                 </button>
                 <button
-                  onClick={() => setActivePolicy("privacy")}
+                  onClick={() => handlePolicyOpen("privacy")}
                   className="block px-3 py-2 text-base font-medium text-foreground hover:text-primary"
                 >
                   Privacy Policy
                 </button>
                 <button
-                  onClick={() => setActivePolicy("refund")}
+                  onClick={() => handlePolicyOpen("refund")}
                   className="block px-3 py-2 text-base font-medium text-foreground hover:text-primary"
                 >
                   Refund & Cancellation Policy
@@ -314,7 +342,7 @@ const Header = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-lg p-6 relative">
             <button
-              onClick={() => setActivePolicy(null)}
+              onClick={handlePolicyClose}
               className="absolute top-3 right-3 text-gray-600 hover:text-black"
             >
               ✖
